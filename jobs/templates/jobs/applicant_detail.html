@@ -1,0 +1,256 @@
+﻿{% extends 'base.html' %}
+{% block title %}Applicant: {{ applicant.full_name }}{% endblock %}
+{% block content %}
+<style>
+    :root {
+        --bg-primary: #030817;
+        --bg-secondary: #0b1120;
+        --accent-color: #2ec8a6;
+        --text-primary: #f8fafc;
+        --text-secondary: #94a3b8;
+        --error-color: #ff6b6b;
+        --warning-color: #f59e0b;
+        --info-color: #3b82f6;
+        --success-color: #10b981;
+        --border-color: #1e293b;
+    }
+
+    .applicant-detail-container {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        padding: 2rem;
+        min-height: 100vh;
+    }
+
+    .applicant-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .applicant-title {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .btn {
+        padding: 0.6rem 1rem;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-secondary {
+        background-color: var(--text-secondary);
+        color: var(--bg-primary);
+        border: none;
+    }
+
+    .btn-secondary:hover {
+        background-color: var(--text-primary);
+    }
+
+    .card {
+        background-color: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+        padding: 1rem 1.5rem;
+        background-color: rgba(46, 200, 166, 0.05);
+        border-bottom: 1px solid var(--border-color);
+        border-radius: 12px 12px 0 0 !important;
+    }
+
+    .card-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin: 0;
+        color: var(--accent-color);
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .list-group {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .list-group-item {
+        background-color: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        padding: 1rem;
+        transition: background-color 0.2s ease;
+    }
+
+    .list-group-item:hover {
+        background-color: rgba(46, 200, 166, 0.05);
+    }
+
+    .list-group-item strong {
+        color: var(--accent-color);
+        min-width: 160px;
+        display: inline-block;
+    }
+
+    .cover-letter {
+        white-space: pre-line;
+        line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+        .applicant-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .btn-group {
+            width: 100%;
+        }
+
+        .btn {
+            flex: 1;
+            justify-content: center;
+        }
+        
+        .list-group-item strong {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+    }
+</style>
+
+<div class="applicant-detail-container">
+    <div class="applicant-header">
+        <h1 class="applicant-title">{{ applicant.full_name }}</h1>
+        <div class="btn-group">
+            <a href="{% url 'jobs:job_applicants' applicant.position_applied.pk %}" class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Back to Applicants
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Contact Information</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <strong>Email:</strong> {{ applicant.email }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Phone:</strong> {{ applicant.phone }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>LinkedIn:</strong> 
+                            {% if applicant.linkedin %}
+                            <a href="{{ applicant.linkedin }}" target="_blank" style="color: var(--accent-color);">{{ applicant.linkedin }}</a>
+                            {% else %}
+                            N/A
+                            {% endif %}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Position Applied:</strong> {{ applicant.position_applied.title }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Cover Letter</h5>
+                </div>
+                <div class="card-body">
+                    <div class="cover-letter">{{ applicant.cover_letter|linebreaks }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Education History</h5>
+                </div>
+                <div class="card-body">
+                    {% if education %}
+                        <ul class="list-group">
+                        {% for edu in education %}
+                            <li class="list-group-item">
+                                <strong>{{ edu.school }}</strong><br>
+                                {{ edu.degree }} ({{ edu.year }})
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        <div style="color: var(--text-secondary);">No education history provided.</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Work Experience</h5>
+                </div>
+                <div class="card-body">
+                    {% if work_experience %}
+                        <ul class="list-group">
+                        {% for work in work_experience %}
+                            <li class="list-group-item">
+                                <strong>{{ work.company }}</strong> — {{ work.role }}<br>
+                                <small style="color: var(--text-secondary);">{{ work.duration }}</small>
+                                <div class="mt-2">{{ work.description|linebreaks }}</div>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        <div style="color: var(--text-secondary);">No work experience provided.</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Skills</h5>
+                </div>
+                <div class="card-body">
+                    {% if skills %}
+                        <ul class="list-group">
+                        {% for skill in skills %}
+                            <li class="list-group-item">{{ skill.name }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        <div style="color: var(--text-secondary);">No skills provided.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

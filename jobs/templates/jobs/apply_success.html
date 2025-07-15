@@ -1,0 +1,121 @@
+﻿{% extends 'base.html' %}
+{% block title %}Application Submitted{% endblock %}
+{% block content %}
+<style>
+    :root {
+        --bg-primary: #0b1120;
+        --bg-secondary: #0b1120;
+        --accent-color: #2ec8a6;
+        --text-primary: #f8fafc;
+        --text-secondary: #94a3b8;
+        --border-color: #1e293b;
+        --error-color: #ff6b6b;
+        --success-color: #2ec8a6;
+    }
+
+    .confirmation-container {
+        padding: 2rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+    }
+
+    .confirmation-card {
+        background-color: var(--bg-primary);
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        padding: 3rem 2rem;
+        max-width: 600px;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .icon-container {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(46, 200, 166, 0.1);
+        border-radius: 50%;
+        border: 2px solid var(--accent-color);
+    }
+
+    .icon-container svg {
+        width: 40px;
+        height: 40px;
+        fill: var(--accent-color);
+    }
+
+    .confirmation-title {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+
+    .confirmation-message {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        background-color: var(--accent-color);
+        border: none;
+        color: var(--bg-primary);
+    }
+
+    .btn-primary:hover {
+        background-color: #25a38a;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(46, 200, 166, 0.2);
+    }
+
+    @media (max-width: 768px) {
+        .confirmation-card {
+            padding: 2rem 1.5rem;
+        }
+        
+        .confirmation-title {
+            font-size: 1.5rem;
+        }
+        
+        .confirmation-message {
+            font-size: 1rem;
+        }
+    }
+</style>
+
+<div class="confirmation-container">
+    <div class="confirmation-card">
+        <div class="icon-container">
+            <svg xmlns="http://www  .w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+        </div>
+        <h2 class="confirmation-title">Thank you for your application!</h2>
+        <p class="confirmation-message">Your application has been successfully submitted. We will review it and get back to you soon.</p>
+        <a href="/" class="btn btn-primary">
+            Back to Home
+        </a>
+    </div>
+</div>
+{% endblock %}

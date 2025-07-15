@@ -1,0 +1,187 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}Job Application{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --bg-primary: #030817;
+        --bg-secondary: #0b1120;
+        --accent-color: #2ec8a6;
+        --text-primary: #f8fafc;
+        --text-secondary: #94a3b8;
+    }
+
+    body {
+        background-color: var(--bg-secondary);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--text-primary);
+    }
+
+    .form-container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+
+    .form-title {
+        text-align: center;
+        font-size: 1.6rem;
+        font-weight: bold;
+        margin-bottom: 25px;
+        color: var(--accent-color);
+    }
+
+    label {
+        font-weight: 500;
+        color: var(--text-secondary);
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    input, select, textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #3c4451;
+        border-radius: 10px;
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        transition: all 0.3s ease-in-out;
+    }
+
+    input:focus, select:focus, textarea:focus {
+        border-color: var(--accent-color);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(46, 200, 166, 0.3);
+        background-color: var(--bg-primary);
+    }
+
+    .text-danger {
+        font-size: 0.875rem;
+        color: #ff6b6b;
+        margin-top: 5px;
+    }
+
+    .section-box {
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        border-left: 3px solid var(--accent-color);
+        background-color: rgba(255,255,255,0.02);
+        border-radius: 8px;
+    }
+
+    .btn-primary {
+        background-color: var(--accent-color);
+        border: none;
+        color: var(--text-primary);
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #25a38a;
+    }
+
+    @media (max-width: 768px) {
+        .row .col-md-6 {
+            margin-bottom: 15px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2 class="form-title">Apply for a Job</h2>
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        <h4 class="text-accent mb-3">Personal Information</h4>
+        <div class="row g-3">
+            <div class="col-md-6">
+                {{ applicant_form.full_name.label_tag }}
+                {{ applicant_form.full_name }}
+                {{ applicant_form.full_name.errors }}
+            </div>
+            <div class="col-md-6">
+                {{ applicant_form.email.label_tag }}
+                {{ applicant_form.email }}
+                {{ applicant_form.email.errors }}
+            </div>
+            <div class="col-md-6">
+                {{ applicant_form.phone.label_tag }}
+                {{ applicant_form.phone }}
+                {{ applicant_form.phone.errors }}
+            </div>
+            <div class="col-md-6">
+                {{ applicant_form.linkedin.label_tag }}
+                {{ applicant_form.linkedin }}
+                {{ applicant_form.linkedin.errors }}
+            </div>
+            <div class="col-md-6">
+                {{ applicant_form.position_applied.label_tag }}
+                {{ applicant_form.position_applied }}
+                {{ applicant_form.position_applied.errors }}
+            </div>
+            <div class="col-12">
+                {{ applicant_form.cover_letter.label_tag }}
+                {{ applicant_form.cover_letter }}
+                {{ applicant_form.cover_letter.errors }}
+            </div>
+        </div>
+
+        <h4 class="text-accent mt-4 mb-2">Education History</h4>
+        {{ education_formset.management_form }}
+        {% for form in education_formset %}
+        <div class="section-box">
+            <div class="row g-3">
+                {% for field in form.visible_fields %}
+                <div class="col-md-6">
+                    {{ field.label_tag }}{{ field }}
+                    {% if field.errors %}
+                    <div class="text-danger">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <h4 class="text-accent mt-4 mb-2">Work Experience</h4>
+        {{ work_formset.management_form }}
+        {% for form in work_formset %}
+        <div class="section-box">
+            <div class="row g-3">
+                {% for field in form.visible_fields %}
+                <div class="col-md-6">
+                    {{ field.label_tag }}{{ field }}
+                    {% if field.errors %}
+                    <div class="text-danger">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <h4 class="text-accent mt-4 mb-2">Skills</h4>
+        {{ skill_formset.management_form }}
+        <div class="row g-3">
+            {% for form in skill_formset %}
+            <div class="col-md-6">
+                {{ form.name.label_tag }}{{ form.name }}
+                {% if form.name.errors %}
+                <div class="text-danger">{{ form.name.errors }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="mt-4 text-end">
+            <button type="submit" class="btn btn-primary">Submit Application</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,418 @@
+﻿{% extends 'base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<style>
+    :root {
+        --bg-primary: #0b1120;
+        --accent-color: #2ec8a6;
+        --text-primary: #f8fafc;
+        --text-secondary: #94a3b8;
+        --card-bg: rgba(255, 255, 255, 0.03);
+        --card-border: rgba(255, 255, 255, 0.1);
+    }
+
+    .dashboard {
+        padding: 2rem;
+    }
+
+    .welcome-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--card-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .welcome-title {
+        font-size: 2rem;
+        font-weight: 600;
+        color: var(--accent-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .welcome-subtitle {
+        font-size: 1rem;
+        color: var(--text-secondary);
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary {
+        background-color: var(--accent-color);
+        border: none;
+        color: var(--bg-primary);
+    }
+
+    .btn-primary:hover {
+        background-color: #25a38a;
+        transform: translateY(-2px);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background-color: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background-color: var(--accent-color);
+    }
+
+    .stat-card.jobs::before { background-color: #2ec8a6; }
+    .stat-card.applicants::before { background-color: #6366f1; }
+    .stat-card.deadlines::before { background-color: #f59e0b; }
+
+    .stat-icon {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: var(--accent-color);
+    }
+
+    .stat-card.jobs .stat-icon { color: #2ec8a6; }
+    .stat-card.applicants .stat-icon { color: #6366f1; }
+    .stat-card.deadlines .stat-icon { color: #f59e0b; }
+
+    .stat-title {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-change {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    .stat-change.positive {
+        color: #10b981;
+    }
+
+    .stat-change.negative {
+        color: #ef4444;
+    }
+
+    .data-card {
+        background-color: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .data-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--card-border);
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: var(--accent-color);
+        margin: 0;
+    }
+
+    .table-container {
+        overflow-x: auto;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .data-table thead th {
+        background-color: rgba(46, 200, 166, 0.1);
+        color: var(--accent-color);
+        font-weight: 500;
+        padding: 1rem 1.5rem;
+        text-align: left;
+        border-bottom: 1px solid var(--card-border);
+    }
+
+    .data-table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+    .data-table tbody tr:hover {
+        background-color: rgba(46, 200, 166, 0.05);
+    }
+
+    .data-table tbody td {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--card-border);
+        color: var(--text-primary);
+    }
+
+    .job-link {
+        color: var(--accent-color);
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .job-link:hover {
+        text-decoration: underline;
+        opacity: 0.9;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .action-btn {
+        padding: 0.5rem;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        width: 32px;
+        height: 32px;
+    }
+
+    .view-btn {
+        background-color: rgba(46, 200, 166, 0.1);
+        color: var(--accent-color);
+        border: 1px solid var(--accent-color);
+    }
+
+    .edit-btn {
+        background-color: rgba(148, 163, 184, 0.1);
+        color: var(--text-secondary);
+        border: 1px solid var(--text-secondary);
+    }
+
+    .delete-btn {
+        background-color: rgba(255, 107, 107, 0.1);
+        color: #ef4444;
+        border: 1px solid #ef4444;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state-icon {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        color: var(--text-secondary);
+    }
+
+    @media (max-width: 768px) {
+        .dashboard {
+            padding: 1rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .welcome-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .data-table thead th,
+        .data-table tbody td {
+            padding: 0.75rem;
+        }
+    }
+</style>
+
+<div class="dashboard">
+    <div class="welcome-header">
+        <div>
+            <h1 class="welcome-title">Admin Dashboard</h1>
+            <p class="welcome-subtitle">Manage job postings and applications</p>
+        </div>
+        <a href="{% url 'jobs:job_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Create New Job
+        </a>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card jobs">
+            <i class="bi bi-briefcase stat-icon"></i>
+            <div class="stat-title">Total Jobs</div>
+            <div class="stat-value" id="jobs-counter">{{ total_jobs }}</div>
+            <div class="stat-change positive">↑ 5% from last month</div>
+        </div>
+        
+        <div class="stat-card applicants">
+            <i class="bi bi-people stat-icon"></i>
+            <div class="stat-title">Active Applications</div>
+            <div class="stat-value" id="applicants-counter">{{ total_applicants }}</div>
+            <div class="stat-change positive">↑ 12% from last month</div>
+        </div>
+        
+        <div class="stat-card deadlines">
+            <i class="bi bi-calendar-x stat-icon"></i>
+            <div class="stat-title">Upcoming Deadlines</div>
+            <div class="stat-value" id="deadlines-counter">{{ upcoming_deadlines }}</div>
+            <div class="stat-change negative">3 due this week</div>
+        </div>
+    </div>
+
+    <div class="data-card">
+        <div class="card-header">
+            <h2 class="card-title">Recent Job Postings</h2>
+        </div>
+        
+        <div class="card-body">
+            {% if jobs %}
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Deadline</th>
+                                <th>Applicants</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for job in recent_jobs %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'jobs:job_applicants' job.pk %}" class="job-link">
+                                            {{ job.title }}
+                                        </a>
+                                    </td>
+                                    <td>{{ job.deadline }}</td>
+                                    <td>{{ job.applicants.count }}</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a href="{% url 'jobs:job_edit' job.pk %}" class="action-btn edit-btn" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="{% url 'jobs:job_delete' job.pk %}" class="action-btn delete-btn" title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="bi bi-briefcase empty-state-icon"></i>
+                    <p>No jobs found</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate welcome header
+        const welcomeHeader = document.querySelector('.welcome-header');
+        welcomeHeader.style.opacity = '0';
+        welcomeHeader.style.transform = 'translateY(20px)';
+        welcomeHeader.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+        
+        setTimeout(() => {
+            welcomeHeader.style.opacity = '1';
+            welcomeHeader.style.transform = 'translateY(0)';
+        }, 100);
+        
+        // Counter animation for stats
+        function animateCounter(element, target, duration = 2000) {
+            const start = 0;
+            const increment = target / (duration / 16);
+            let current = start;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    clearInterval(timer);
+                    current = target;
+                }
+                element.textContent = Math.floor(current);
+            }, 16);
+        }
+        
+        // Animate all counters
+        animateCounter(document.getElementById('jobs-counter'), {{ total_jobs }});
+        animateCounter(document.getElementById('applicants-counter'), {{ total_applicants }});
+        animateCounter(document.getElementById('deadlines-counter'), {{ upcoming_deadlines }});
+        
+        // Add hover effects to cards
+        const cards = document.querySelectorAll('.stat-card, .data-card');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = card.classList.contains('stat-card') ? 
+                    'translateY(-5px)' : 'translateY(-3px)';
+                card.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.2)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+                card.style.boxShadow = 'none';
+            });
+        });
+    });
+</script>
+{% endblock %}

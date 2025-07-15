@@ -1,0 +1,303 @@
+﻿{% block extra_css %}
+<style>
+    :root {
+        --bg-primary: #030817;
+        --bg-secondary: #0b1120;
+        --accent-color: #2ec8a6;
+        --text-primary: #f8fafc;
+        --text-secondary: #94a3b8;
+        --error-color: #ff6b6b;
+        --border-color: #1e293b;
+        --box-shadow: rgba(0, 0, 0, 0.3);
+        --transition-speed: 0.3s;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Roboto', sans-serif;
+    }
+
+    body {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        font-size: 1rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        overflow: hidden;
+    }
+
+    .login-container {
+        width: 100%;
+        max-width: 500px;
+        padding: 2rem;
+        background-color: var(--bg-primary);
+        border-radius: 16px;
+        box-shadow: 0 10px 30px var(--box-shadow);
+        transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+    }
+
+    .login-container:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .form-subtitle {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+        transition: all var(--transition-speed);
+    }
+
+    .input-container {
+        position: relative;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 20px;
+        height: 20px;
+        color: var(--text-secondary);
+        transition: color var(--transition-speed);
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.9rem 1.2rem 0.9rem 3rem;
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        transition: all var(--transition-speed);
+    }
+
+    .form-control:focus {
+        border-color: var(--accent-color);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(46, 200, 166, 0.2);
+    }
+
+    .form-control:focus ~ .input-icon,
+    .form-control:not(:placeholder-shown) ~ .input-icon {
+        color: var(--accent-color);
+    }
+
+    .btn {
+        padding: 1rem;
+        border-radius: 10px;
+        font-weight: 500;
+        font-size: 1rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all var(--transition-speed);
+        width: 100%;
+    }
+
+    .btn-primary {
+        background-color: var(--accent-color);
+        border: none;
+        color: var(--bg-primary);
+    }
+
+    .btn-primary:hover {
+        background-color: #25a38a;
+        transform: translateY(-2px);
+    }
+
+    .btn-link {
+        color: var(--text-secondary);
+        text-decoration: none;
+        display: block;
+        margin-top: 1rem;
+        text-align: center;
+        font-size: 0.9rem;
+        transition: color var(--transition-speed);
+    }
+
+    .btn-link:hover {
+        color: var(--accent-color);
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+        background-color: rgba(255, 107, 107, 0.1);
+        border: 1px solid rgba(255, 107, 107, 0.3);
+        color: var(--error-color);
+        text-align: center;
+    }
+
+    .ehr-icon {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 1rem;
+        background-color: rgba(46, 200, 166, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .ehr-icon svg {
+        width: 30px;
+        height: 30px;
+        stroke: var(--accent-color);
+    }
+
+    /* Password toggle styles */
+    .password-wrapper {
+        position: relative;
+    }
+    
+    .toggle-password {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: var(--text-secondary);
+        transition: color var(--transition-speed);
+    }
+    
+    .toggle-password:hover {
+        color: var(--accent-color);
+    }
+
+    @media (max-width: 480px) {
+        .login-container {
+            padding: 1rem;
+        }
+
+        .form-title {
+            font-size: 1.3rem;
+        }
+
+        .btn {
+            padding: 0.8rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="form-header">
+        <div class="ehr-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+        </div>
+        <h1 class="form-title">Admin Login</h1>
+        <p class="form-subtitle">Secure access to admin dashboard</p>
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.errors %}
+            <div class="alert">
+                Your username and password didn't match. Please try again.
+            </div>
+        {% endif %}
+        
+        <div class="form-group">
+            <label for="username" class="form-label">Username</label>
+            <div class="input-container">
+                <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <input type="text" name="username" id="username" class="form-control" required autofocus>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="password" class="form-label">Password</label>
+            <div class="input-container password-wrapper">
+                <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <input type="password" name="password" id="password" class="form-control" required>
+                <span id="togglePassword" class="toggle-password" title="Show/Hide Password">&#128065;</span>
+            </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('.login-container');
+        form.style.opacity = '0';
+        form.style.transform = 'translateY(20px)';
+        form.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+        
+        setTimeout(() => {
+            form.style.opacity = '1';
+            form.style.transform = 'translateY(0)';
+        }, 100);
+
+        // Password toggle functionality
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.textContent = type === 'password' ? '👁️' : '🔒';
+        });
+
+        // Add focus effects for input icons
+        const inputs = document.querySelectorAll('.form-control');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.querySelector('.input-icon').style.color = 'var(--accent-color)';
+            });
+            
+            input.addEventListener('blur', function() {
+                if (!this.value) {
+                    this.parentElement.querySelector('.input-icon').style.color = 'var(--text-secondary)';
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

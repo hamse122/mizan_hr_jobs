@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mizan HR Consulting - Tech Talent Platform</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Connecting top tech talent with innovative companies worldwide">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-primary: #030817;
+      --bg-secondary: #0b1120;
+      --accent-color: #2ec8a6;
+      --accent-hover: #25a38a;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --border-color: #1e293b;
+      --card-bg: rgba(15, 23, 42, 0.7);
+    }
+
+    body {
+      background-color: var(--bg-secondary);
+      color: var(--text-primary);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+
+    /* Navigation */
+    .navbar {
+      background-color: var(--bg-primary);
+      padding: 1rem 2rem;
+      border-bottom: 1px solid var(--border-color);
+      backdrop-filter: blur(10px);
+    }
+
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--accent-color);
+    }
+
+    .navbar-brand img {
+      height: 40px;
+      margin-right: 12px;
+    }
+
+    .nav-link {
+      color: var(--text-secondary);
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      transition: color 0.3s ease;
+    }
+
+    .nav-link:hover {
+      color: var(--accent-color);
+    }
+
+    .btn-login {
+      background-color: transparent;
+      border: 1px solid var(--accent-color);
+      color: var(--accent-color);
+      padding: 0.5rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .btn-login:hover {
+      background-color: var(--accent-color);
+      color: var(--bg-primary);
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 6rem 2rem 4rem;
+      background: linear-gradient(to bottom, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 100%;
+      background: radial-gradient(circle at 70% 30%, rgba(46, 200, 166, 0.1) 0%, transparent 50%);
+      z-index: 0;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .hero h1 {
+      font-size: 3.2rem;
+      font-weight: 800;
+      background: linear-gradient(to right, #2ec8a6, #3b82f6);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 1.5rem;
+      line-height: 1.2;
+    }
+
+    .hero p {
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+      margin-bottom: 2.5rem;
+      opacity: 0.9;
+    }
+
+    .btn-primary {
+      background-color: var(--accent-color);
+      color: var(--bg-primary);
+      font-weight: 600;
+      padding: 0.75rem 2rem;
+      border-radius: 8px;
+      border: none;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(46, 200, 166, 0.2);
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      border: 1px solid var(--accent-color);
+      color: var(--accent-color);
+      padding: 0.75rem 2rem;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+      background-color: rgba(46, 200, 166, 0.1);
+      transform: translateY(-2px);
+    }
+
+    /* Features Section */
+    .section-title {
+      text-align: center;
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin: 4rem 0 2rem;
+      color: var(--text-primary);
+      position: relative;
+    }
+
+    .section-title::after {
+      content: '';
+      display: block;
+      width: 80px;
+      height: 4px;
+      background: var(--accent-color);
+      margin: 1rem auto 0;
+      border-radius: 2px;
+    }
+
+    .feature-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      height: 100%;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      border-color: rgba(46, 200, 166, 0.3);
+    }
+
+    .feature-icon {
+      font-size: 2.5rem;
+      color: var(--accent-color);
+      margin-bottom: 1.5rem;
+    }
+
+    .feature-card h3 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+    }
+
+    .feature-card p {
+      color: var(--text-secondary);
+      margin-bottom: 1.5rem;
+    }
+
+    /* Job Listings */
+    .job-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .job-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      border-color: rgba(46, 200, 166, 0.3);
+    }
+
+    .job-card h5 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--accent-color);
+      margin-bottom: 0.5rem;
+    }
+
+    .job-meta {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .job-meta span {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .job-card p {
+      color: var(--text-secondary);
+      margin-bottom: 1.5rem;
+    }
+
+    /* CTA Section */
+    .cta-section {
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+      border-radius: 16px;
+      padding: 4rem 2rem;
+      margin: 4rem 0;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(46, 200, 166, 0.05) 0%, transparent 70%);
+      z-index: 0;
+    }
+
+    .cta-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta-section h3 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: var(--text-primary);
+    }
+
+    .cta-section p {
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto 2rem;
+      font-size: 1.1rem;
+    }
+
+    /* Footer */
+    .footer {
+      background-color: var(--bg-primary);
+      padding: 3rem 0 2rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .footer-logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent-color);
+      margin-bottom: 1.5rem;
+      display: inline-block;
+    }
+
+    .footer-links h5 {
+      color: var(--text-primary);
+      font-size: 1.1rem;
+      margin-bottom: 1.2rem;
+      font-weight: 600;
+    }
+
+    .footer-links ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .footer-links li {
+      margin-bottom: 0.7rem;
+    }
+
+    .footer-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .footer-links a:hover {
+      color: var(--accent-color);
+    }
+
+    .social-links {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .social-links a {
+      color: var(--text-secondary);
+      font-size: 1.2rem;
+      transition: color 0.3s ease;
+    }
+
+    .social-links a:hover {
+      color: var(--accent-color);
+    }
+
+    .copyright {
+      text-align: center;
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+      
+      .hero p {
+        font-size: 1.1rem;
+      }
+      
+      .section-title {
+        font-size: 2rem;
+      }
+      
+      .navbar {
+        padding: 1rem;
+      }
+    }
+
+      .logo-img {
+      height: 60px;
+      width: auto;
+      object-fit: contain;
+  }
+
+  @media (max-width: 768px) {
+      .logo-img {
+          height: 45px;
+      }
+  }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+<a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'jobs:home' %}">
+  <img src="https://i.postimg.cc/fL22Wp41/b4593a04-a158-442a-b038-03bc8a892a6d.png" alt="Mizan HR Logo" class="logo-img">
+  <span class="fw-bold fs-4 text-white">Mizan HR</span>
+</a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="#">Jobs</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">For Companies</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Resources</a>
+          </li>
+          <li class="nav-item ms-lg-3">
+            <a class="btn btn-login" href="{% url 'jobs:admin_login' %}">
+              <i class="fas fa-sign-in-alt"></i> Login
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Build Your Future in Tech</h1>
+      <p>Join the fastest-growing platform connecting top tech talent with innovative companies worldwide. Find your perfect role and accelerate your career.</p>
+      <div class="d-flex justify-content-center gap-3">
+        <a href="#" class="btn btn-primary">
+          <i class="fas fa-search"></i> Browse Jobs
+        </a>
+        <a href="#" class="btn btn-secondary">
+          <i class="fas fa-play-circle"></i> How It Works
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <div class="container">
+    <!-- Features Section -->
+    <h2 class="section-title">Why Choose Mizan HR</h2>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-bolt"></i>
+          </div>
+          <h3>Direct Hiring</h3>
+          <p>Connect directly with hiring teams and decision makers, bypassing traditional recruitment barriers.</p>
+          <a href="#" class="text-accent">Learn more <i class="fas fa-arrow-right"></i></a>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-star"></i>
+          </div>
+          <h3>Curated Opportunities</h3>
+          <p>Our team personally vets every company and role to ensure quality matches for your career goals.</p>
+          <a href="#" class="text-accent">Learn more <i class="fas fa-arrow-right"></i></a>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <h3>Career Support</h3>
+          <p>Access mentorship, interview prep, and professional development resources from our community.</p>
+          <a href="#" class="text-accent">Learn more <i class="fas fa-arrow-right"></i></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Job Listings -->
+    <h2 class="section-title">Featured Tech Roles</h2>
+    
+    <div class="job-card">
+      <h5>Senior Frontend Engineer (React)</h5>
+      <div class="job-meta">
+        <span><i class="fas fa-briefcase"></i> Full-time</span>
+        <span><i class="fas fa-globe"></i> Remote</span>
+        <span><i class="fas fa-dollar-sign"></i> $120k - $160k</span>
+      </div>
+      <p>Lead the development of cutting-edge user interfaces for our SaaS platform. You'll work with React, TypeScript, and Next.js to build performant, accessible web applications.</p>
+      <a href="#" class="btn btn-primary">Apply Now</a>
+    </div>
+
+    <div class="job-card">
+      <h5>Backend Developer (Python/Django)</h5>
+      <div class="job-meta">
+        <span><i class="fas fa-briefcase"></i> Full-time</span>
+        <span><i class="fas fa-map-marker-alt"></i> San Francisco, CA</span>
+        <span><i class="fas fa-dollar-sign"></i> $140k - $180k</span>
+      </div>
+      <p>Design and implement scalable backend services and APIs. Strong experience with Django, PostgreSQL, and cloud infrastructure required.</p>
+      <a href="#" class="btn btn-primary">Apply Now</a>
+    </div>
+
+    <div class="job-card">
+      <h5>DevOps Engineer</h5>
+      <div class="job-meta">
+        <span><i class="fas fa-briefcase"></i> Contract</span>
+        <span><i class="fas fa-globe"></i> Remote</span>
+        <span><i class="fas fa-dollar-sign"></i> $80 - $120/hr</span>
+      </div>
+      <p>Implement CI/CD pipelines and optimize our AWS infrastructure. Terraform, Kubernetes, and GitOps experience preferred.</p>
+      <a href="#" class="btn btn-primary">Apply Now</a>
+    </div>
+
+    <div class="text-center mt-4">
+      <a href="{% url 'jobs:job_list' %}" class="btn btn-secondary">
+        <i class="fas fa-list"></i> View All Jobs
+      </a>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="cta-section">
+      <div class="cta-content">
+        <h3>Ready to take the next step in your career?</h3>
+        <p>Join thousands of tech professionals who found their dream jobs through our platform. Create your profile and get matched with top companies.</p>
+        <a href="#" class="btn btn-primary">
+          <i class="fas fa-user-plus"></i> Create Free Account
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-4 mb-4">
+          <a href="{% url 'jobs:home' %}" class="footer-logo">
+            <img src="https://i.postimg.cc/fL22Wp41/b4593a04-a158-442a-b038-03bc8a892a6d.png" alt="Mizan HR Logo" height="40"> Mizan HR
+          </a>
+          <p class="text-secondary">Connecting top tech talent with innovative companies worldwide since 2022.</p>
+          <div class="social-links">
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-linkedin"></i></a>
+            <a href="#"><i class="fab fa-github"></i></a>
+          </div>
+        </div>
+        <div class="col-lg-2 col-md-4 mb-4">
+          <div class="footer-links">
+            <h5>For Candidates</h5>
+            <ul>
+              <li><a href="{% url 'jobs:job_list' %}">Browse Jobs</a></li>
+              <li><a href="#">Career Resources</a></li>
+              <li><a href="#">Salary Calculator</a></li>
+              <li><a href="#">Interview Prep</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-lg-2 col-md-4 mb-4">
+          <div class="footer-links">
+            <h5>For Companies</h5>
+            <ul>
+              <li><a href="#">Post a Job</a></li>
+              <li><a href="#">Browse Talent</a></li>
+              <li><a href="#">Pricing</a></li>
+              <li><a href="#">Case Studies</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-lg-2 col-md-4 mb-4">
+          <div class="footer-links">
+            <h5>Company</h5>
+            <ul>
+              <li><a href="#">About Us</a></li>
+              <li><a href="#">Careers</a></li>
+              <li><a href="#">Blog</a></li>
+              <li><a href="#">Contact</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-lg-2 mb-4">
+          <div class="footer-links">
+            <h5>Legal</h5>
+            <ul>
+              <li><a href="#">Privacy Policy</a></li>
+              <li><a href="#">Terms of Service</a></li>
+              <li><a href="#">Cookie Policy</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="copyright">
+        &copy; 2025 Mizan HR Consulting. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Simple animation for feature cards on scroll
+    document.addEventListener('DOMContentLoaded', function() {
+      const featureCards = document.querySelectorAll('.feature-card');
+      
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = 1;
+            entry.target.style.transform = 'translateY(0)';
+          }
+        });
+      }, { threshold: 0.1 });
+      
+      featureCards.forEach(card => {
+        card.style.opacity = 0;
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        observer.observe(card);
+      });
+    });
+  </script>
+</body>
+</html>
