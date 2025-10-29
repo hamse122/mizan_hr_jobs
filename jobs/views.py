@@ -16,6 +16,9 @@ from .utils import (
 from django import forms
 import json
 
+# Enhancement #1: Added documentation
+
+
 # Hardcoded admin credentials
 ADMIN_USERNAME = "xamse"
 ADMIN_PASSWORD = "123"
