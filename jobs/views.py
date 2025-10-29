@@ -340,38 +340,239 @@ def applicant_match_score(request, pk):
 
 
 def api_job_list(request):
-    """API endpoint for job listings (JSON)."""
-    jobs = Job.objects.filter(deadline__gte=timezone.now().date()).order_by('deadline')
+    """API endpoint for job listings (JSON) with pagination and filtering."""
+    from .api_helpers import api_success, api_error, handle_api_exceptions, paginate_queryset, validate_api_params
     
-    job_list = []
-    for job in jobs:
-        job_list.append({
+    @handle_api_exceptions
+    def _get_jobs():
+        # Validate parameters
+        is_valid, params, error = validate_api_params(
+            request,
+            optional_params={
+                'page': 1,
+                'page_size': 20,
+                'status': 'active',  # active, expired, all
+                'search': ''
+            }
+        )
+        
+        if not is_valid:
+            return error
+        
+        # Build queryset
+        jobs = Job.objects.all()
+        
+        # Filter by status
+        if params.get('status') == 'active':
+            jobs = jobs.filter(deadline__gte=timezone.now().date())
+        elif params.get('status') == 'expired':
+            jobs = jobs.filter(deadline__lt=timezone.now().date())
+        
+        # Search filter
+        search_query = params.get('search', '')
+        if search_query:
+            jobs = jobs.filter(
+                Q(title__icontains=search_query) |
+                Q(description__icontains=search_query)
+            )
+        
+        # Order by deadline
+        jobs = jobs.order_by('deadline')
+        
+        # Paginate
+        try:
+            page = int(params.get('page', 1))
+            page_size = min(int(params.get('page_size', 20)), 100)  # Max 100 per page
+        except (ValueError, TypeError):
+            return api_error("Invalid pagination parameters", status_code=400)
+        
+        paginated_data = paginate_queryset(jobs, page, page_size)
+        
+        # Serialize job data
+        job_list = []
+        for job in paginated_data['items']:
+            job_list.append({
+                'id': job.id,
+                'title': job.title,
+                'description': job.description[:200] + '...' if len(job.description) > 200 else job.description,
+                'deadline': str(job.deadline),
+                'days_until_deadline': job.days_until_deadline(),
+                'applicant_count': job.get_applicant_count(),
+                'status': job.get_status(),
+                'is_active': job.is_active(),
+                'is_urgent': job.is_urgent(),
+            })
+        
+        return api_success({
+            'jobs': job_list,
+            'pagination': paginated_data['pagination']
+        })
+    
+    return _get_jobs()
+
+
+def api_job_detail(request, pk):
+    """API endpoint for single job detail (JSON) with enhanced error handling."""
+    from .api_helpers import api_success, api_error, handle_api_exceptions
+    
+    @handle_api_exceptions
+    def _get_job():
+        try:
+            job = Job.objects.get(pk=pk)
+        except Job.DoesNotExist:
+            return api_error("Job not found", status_code=404)
+        
+        # Get applicants summary
+        applicants = job.applicants.all()
+        applicants_by_status = {}
+        for status_code, status_name in Applicant._meta.get_field('status').choices:
+            count = applicants.filter(status=status_code).count()
+            if count > 0:
+                applicants_by_status[status_name] = count
+        
+        job_data = {
             'id': job.id,
             'title': job.title,
             'description': job.description,
             'deadline': str(job.deadline),
             'days_until_deadline': job.days_until_deadline(),
+            'is_active': job.is_active(),
+            'is_urgent': job.is_urgent(),
             'applicant_count': job.get_applicant_count(),
             'status': job.get_status(),
+            'created_at': job.created_at.isoformat() if job.created_at else None,
+            'updated_at': job.updated_at.isoformat() if job.updated_at else None,
+            'applicants_summary': {
+                'total': applicants.count(),
+                'by_status': applicants_by_status
+            }
+        }
+        
+        return api_success(job_data)
+    
+    return _get_job()
+
+
+def api_applicant_list(request):
+    """API endpoint for listing applicants with filtering and pagination."""
+    from .api_helpers import api_success, handle_api_exceptions, paginate_queryset, validate_api_params
+    
+    @handle_api_exceptions
+    def _get_applicants():
+        is_valid, params, error = validate_api_params(
+            request,
+            optional_params={
+                'page': 1,
+                'page_size': 20,
+                'status': '',
+                'job_id': ''
+            }
+        )
+        
+        if not is_valid:
+            return error
+        
+        applicants = Applicant.objects.all().select_related('position_applied')
+        
+        # Filter by status
+        if params.get('status'):
+            applicants = applicants.filter(status=params['status'])
+        
+        # Filter by job
+        if params.get('job_id'):
+            try:
+                applicants = applicants.filter(position_applied_id=int(params['job_id']))
+            except ValueError:
+                return api_error("Invalid job_id parameter", status_code=400)
+        
+        applicants = applicants.order_by('-created_at')
+        
+        # Paginate
+        try:
+            page = int(params.get('page', 1))
+            page_size = min(int(params.get('page_size', 20)), 100)
+        except (ValueError, TypeError):
+            return api_error("Invalid pagination parameters", status_code=400)
+        
+        paginated_data = paginate_queryset(applicants, page, page_size)
+        
+        # Serialize applicant data
+        applicant_list = []
+        for applicant in paginated_data['items']:
+            applicant_list.append({
+                'id': applicant.id,
+                'full_name': applicant.full_name,
+                'email': applicant.email,
+                'status': applicant.status,
+                'position_applied': {
+                    'id': applicant.position_applied.id if applicant.position_applied else None,
+                    'title': applicant.position_applied.title if applicant.position_applied else None,
+                } if applicant.position_applied else None,
+                'profile_completeness': applicant.get_profile_completeness_score(),
+                'created_at': applicant.created_at.isoformat() if applicant.created_at else None,
+            })
+        
+        return api_success({
+            'applicants': applicant_list,
+            'pagination': paginated_data['pagination']
         })
     
-    return JsonResponse({'jobs': job_list})
+    return _get_applicants()
 
 
-def api_job_detail(request, pk):
-    """API endpoint for single job detail (JSON)."""
-    job = get_object_or_404(Job, pk=pk)
+def api_applicant_detail(request, pk):
+    """API endpoint for single applicant detail."""
+    from .api_helpers import api_success, api_error, handle_api_exceptions
     
-    job_data = {
-        'id': job.id,
-        'title': job.title,
-        'description': job.description,
-        'deadline': str(job.deadline),
-        'days_until_deadline': job.days_until_deadline(),
-        'is_active': job.is_active(),
-        'is_urgent': job.is_urgent(),
-        'applicant_count': job.get_applicant_count(),
-        'status': job.get_status(),
-    }
+    @handle_api_exceptions
+    def _get_applicant():
+        try:
+            applicant = Applicant.objects.get(pk=pk)
+        except Applicant.DoesNotExist:
+            return api_error("Applicant not found", status_code=404)
+        
+        applicant_data = {
+            'id': applicant.id,
+            'full_name': applicant.full_name,
+            'email': applicant.email,
+            'phone': applicant.phone,
+            'linkedin': applicant.linkedin,
+            'cover_letter': applicant.cover_letter,
+            'status': applicant.status,
+            'position_applied': {
+                'id': applicant.position_applied.id if applicant.position_applied else None,
+                'title': applicant.position_applied.title if applicant.position_applied else None,
+            } if applicant.position_applied else None,
+            'profile_completeness': applicant.get_profile_completeness_score(),
+            'education': [
+                {
+                    'school': edu.school,
+                    'degree': edu.degree,
+                    'year': edu.year,
+                    'gpa': float(edu.gpa) if edu.gpa else None,
+                }
+                for edu in applicant.education_history.all()
+            ],
+            'work_experience': [
+                {
+                    'company': work.company,
+                    'role': work.role,
+                    'duration': work.duration,
+                    'is_current': work.is_current,
+                }
+                for work in applicant.work_experience.all()
+            ],
+            'skills': [
+                {
+                    'name': skill.name,
+                    'category': skill.category,
+                    'proficiency': skill.proficiency,
+                }
+                for skill in applicant.skills.all()
+            ],
+            'created_at': applicant.created_at.isoformat() if applicant.created_at else None,
+        }
+        
+        return api_success(applicant_data)
     
-    return JsonResponse(job_data)
+    return _get_applicant()

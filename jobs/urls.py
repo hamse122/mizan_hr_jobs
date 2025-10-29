@@ -28,6 +28,8 @@ urlpatterns = [
     # API endpoints
     path('api/jobs/', views.api_job_list, name='api_job_list'),
     path('api/job/<int:pk>/', views.api_job_detail, name='api_job_detail'),
+    path('api/applicants/', views.api_applicant_list, name='api_applicant_list'),
+    path('api/applicant/<int:pk>/', views.api_applicant_detail, name='api_applicant_detail'),
 
     path('', views.home, name='home'), 
 ]
