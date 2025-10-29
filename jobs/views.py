@@ -1,12 +1,20 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, Count, Avg
 from django.utils import timezone
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse, HttpResponse
 from django.contrib import messages
+from django.views.decorators.http import require_http_methods
+from django.db import transaction
 from .models import Job, Applicant, Education, WorkExperience, Skill
 from .forms import ApplicantForm, EducationFormSet, WorkExperienceFormSet, SkillFormSet, JobForm
+from .utils import (
+    get_job_statistics, get_upcoming_deadlines, 
+    calculate_applicant_match_score, export_applicants_to_dict,
+    validate_email_domain, check_duplicate_application
+)
 from django import forms
+import json
 
 # Hardcoded admin credentials
 ADMIN_USERNAME = "xamse"
@@ -185,3 +193,185 @@ def apply(request):
 
 def apply_success(request):
     return render(request, 'jobs/apply_success.html')
+
+
+@admin_required
+def applicant_list(request):
+    """List all applicants with filtering options."""
+    applicants = Applicant.objects.all().select_related('position_applied')
+    
+    # Filter by status
+    status_filter = request.GET.get('status', '')
+    if status_filter:
+        applicants = applicants.filter(status=status_filter)
+    
+    # Filter by job
+    job_filter = request.GET.get('job', '')
+    if job_filter:
+        applicants = applicants.filter(position_applied_id=job_filter)
+    
+    # Search
+    search_query = request.GET.get('search', '')
+    if search_query:
+        applicants = applicants.filter(
+            Q(full_name__icontains=search_query) |
+            Q(email__icontains=search_query) |
+            Q(phone__icontains=search_query)
+        )
+    
+    # Pagination
+    paginator = Paginator(applicants, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    jobs = Job.objects.all()
+    
+    return render(request, 'jobs/applicant_list.html', {
+        'applicants': page_obj,
+        'jobs': jobs,
+        'status_filter': status_filter,
+        'job_filter': job_filter,
+        'search_query': search_query,
+        'page_obj': page_obj,
+    })
+
+
+@admin_required
+@require_http_methods(["POST"])
+def update_applicant_status(request, pk):
+    """Update applicant status (AJAX endpoint)."""
+    applicant = get_object_or_404(Applicant, pk=pk)
+    new_status = request.POST.get('status')
+    
+    valid_statuses = ['pending', 'reviewed', 'shortlisted', 'rejected', 'hired']
+    if new_status in valid_statuses:
+        applicant.status = new_status
+        applicant.save()
+        return JsonResponse({'success': True, 'status': new_status})
+    
+    return JsonResponse({'success': False, 'error': 'Invalid status'})
+
+
+@admin_required
+def statistics_view(request):
+    """Display detailed statistics."""
+    stats = get_job_statistics()
+    
+    # Additional statistics
+    applicants_by_status = Applicant.objects.values('status').annotate(
+        count=Count('id')
+    ).order_by('status')
+    
+    jobs_by_month = Job.objects.extra(
+        select={'month': "strftime('%%Y-%%m', created_at)"}
+    ).values('month').annotate(count=Count('id')).order_by('-month')[:12]
+    
+    top_skills = Skill.objects.values('name').annotate(
+        count=Count('id')
+    ).order_by('-count')[:10]
+    
+    recent_applications = Applicant.objects.select_related(
+        'position_applied'
+    ).order_by('-created_at')[:10]
+    
+    return render(request, 'jobs/statistics.html', {
+        'stats': stats,
+        'applicants_by_status': applicants_by_status,
+        'jobs_by_month': jobs_by_month,
+        'top_skills': top_skills,
+        'recent_applications': recent_applications,
+    })
+
+
+@admin_required
+def export_applicants_view(request, job_id):
+    """Export applicants data for a job."""
+    job = get_object_or_404(Job, pk=job_id)
+    data = export_applicants_to_dict(job)
+    
+    format_type = request.GET.get('format', 'json')
+    
+    if format_type == 'json':
+        response = HttpResponse(
+            json.dumps(data, indent=2),
+            content_type='application/json'
+        )
+        response['Content-Disposition'] = f'attachment; filename="applicants_{job_id}.json"'
+        return response
+    else:
+        # CSV export
+        import csv
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="applicants_{job_id}.csv"'
+        
+        if data:
+            writer = csv.DictWriter(response, fieldnames=data[0].keys())
+            writer.writeheader()
+            for row in data:
+                csv_row = {}
+                for key, value in row.items():
+                    if isinstance(value, list):
+                        csv_row[key] = ', '.join(str(v) for v in value)
+                    else:
+                        csv_row[key] = value
+                writer.writerow(csv_row)
+        
+        return response
+
+
+@admin_required
+def applicant_match_score(request, pk):
+    """Calculate and display applicant match score."""
+    applicant = get_object_or_404(Applicant, pk=pk)
+    
+    if not applicant.position_applied:
+        messages.error(request, "Applicant has no associated job.")
+        return redirect('jobs:applicant_detail', pk=pk)
+    
+    match_score = calculate_applicant_match_score(applicant, applicant.position_applied)
+    completeness_score = applicant.get_profile_completeness_score()
+    
+    return render(request, 'jobs/applicant_match.html', {
+        'applicant': applicant,
+        'job': applicant.position_applied,
+        'match_score': match_score,
+        'completeness_score': completeness_score,
+    })
+
+
+def api_job_list(request):
+    """API endpoint for job listings (JSON)."""
+    jobs = Job.objects.filter(deadline__gte=timezone.now().date()).order_by('deadline')
+    
+    job_list = []
+    for job in jobs:
+        job_list.append({
+            'id': job.id,
+            'title': job.title,
+            'description': job.description,
+            'deadline': str(job.deadline),
+            'days_until_deadline': job.days_until_deadline(),
+            'applicant_count': job.get_applicant_count(),
+            'status': job.get_status(),
+        })
+    
+    return JsonResponse({'jobs': job_list})
+
+
+def api_job_detail(request, pk):
+    """API endpoint for single job detail (JSON)."""
+    job = get_object_or_404(Job, pk=pk)
+    
+    job_data = {
+        'id': job.id,
+        'title': job.title,
+        'description': job.description,
+        'deadline': str(job.deadline),
+        'days_until_deadline': job.days_until_deadline(),
+        'is_active': job.is_active(),
+        'is_urgent': job.is_urgent(),
+        'applicant_count': job.get_applicant_count(),
+        'status': job.get_status(),
+    }
+    
+    return JsonResponse(job_data)
