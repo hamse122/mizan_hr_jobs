@@ -8,7 +8,7 @@ class Job(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     deadline = models.DateField()
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -72,7 +72,7 @@ class Applicant(models.Model):
     linkedin = models.URLField(blank=True, null=True)
     cover_letter = models.TextField()
     position_applied = models.ForeignKey(Job, on_delete=models.SET_NULL, null=True, related_name='applicants')
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     status = models.CharField(
         max_length=20,
@@ -154,7 +154,7 @@ class Education(models.Model):
     gpa = models.DecimalField(max_digits=3, decimal_places=2, null=True, blank=True)
     major = models.CharField(max_length=255, blank=True)
     honors = models.CharField(max_length=255, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         ordering = ['-year']
@@ -193,7 +193,7 @@ class WorkExperience(models.Model):
     is_current = models.BooleanField(default=False)
     location = models.CharField(max_length=255, blank=True)
     achievements = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         ordering = ['-start_date', '-end_date']
@@ -252,7 +252,7 @@ class Skill(models.Model):
         default=2
     )
     years_experience = models.IntegerField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         ordering = ['category', 'name']
